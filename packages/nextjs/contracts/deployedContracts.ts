@@ -6,32 +6,6 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    Frontline: {
-      address: "0x0000000000000000000000000000000000000000",
-      abi: [
-        {
-          type: "function",
-          name: "claimTile",
-          inputs: [
-            { name: "tileId", type: "uint256", internalType: "uint256" },
-            { name: "teamId", type: "uint8", internalType: "uint8" },
-            { name: "multiplier", type: "uint8", internalType: "uint8" },
-          ],
-          outputs: [],
-          stateMutability: "nonpayable",
-        },
-        {
-          type: "function",
-          name: "getBoard",
-          inputs: [],
-          outputs: [{ name: "", type: "uint8[225]", internalType: "uint8[225]" }],
-          stateMutability: "view",
-        },
-      ],
-      inheritedFunctions: {},
-      deployedOnBlock: 1,
-    },
-
     YourContract: {
       address: "0x700b6a60ce7eaaea56f065753d8dcb9653dbad35",
       abi: [
