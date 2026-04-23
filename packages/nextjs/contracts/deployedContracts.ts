@@ -6,7 +6,7 @@ import { GenericContractsDeclaration } from "~~/utils/scaffold-eth/contract";
 
 const deployedContracts = {
   31337: {
-    Frontline: {
+    MonadFrontline: {
       address: "0x0000000000000000000000000000000000000000",
       abi: [
         {
