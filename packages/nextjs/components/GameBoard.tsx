@@ -13,10 +13,10 @@ export const GameBoard = () => {
   const clickTimes = useRef<number[]>([]);
 
   // --- SMART CONTRACT HOOKS ---
-  const { writeContractAsync: claimTileTx } = useScaffoldWriteContract("Frontline");
+  const { writeContractAsync: claimTileTx } = useScaffoldWriteContract("MonadFrontline");
 
   const { data: boardData } = useScaffoldReadContract({
-    contractName: "Frontline",
+    contractName: "MonadFrontline",
     functionName: "getBoard",
     watch: true, // Auto-refresh every block (approx 2s in Monad)
   });
