@@ -1,81 +1,86 @@
+// packages/nextjs/app/page.tsx
 "use client";
 
-import Link from "next/link";
-import { Address } from "@scaffold-ui/components";
 import type { NextPage } from "next";
-import { hardhat } from "viem/chains";
-import { useAccount } from "wagmi";
-import { BugAntIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useTargetNetwork } from "~~/hooks/scaffold-eth";
+import { useState } from "react";
 
-const Home: NextPage = () => {
-  const { address: connectedAddress } = useAccount();
-  const { targetNetwork } = useTargetNetwork();
+// 15x15 = 225 Kare
+const TOTAL_TILES = 15 * 15; 
+
+// 🔥 GIGACHAD FIX: Config'i ezip direkt Tailwind'in kendi renklerini ve custom shadow'ları basıyoruz
+const teams = {
+  0: { id: 0, name: "Empty", bg: "bg-zinc-900", border: "border-zinc-800 hover:bg-zinc-700", shadow: "" },
+  1: { id: 1, name: "Red", bg: "bg-red-500", border: "border-red-900", shadow: "shadow-[0_0_15px_#ef4444] hover:border-white" },
+  2: { id: 2, name: "Blue", bg: "bg-blue-500", border: "border-blue-900", shadow: "shadow-[0_0_15px_#3b82f6] hover:border-white" },
+  3: { id: 3, name: "Green", bg: "bg-green-500", border: "border-green-900", shadow: "shadow-[0_0_15px_#22c55e] hover:border-white" },
+};
+
+const HomePage: NextPage = () => {
+  const [gridState, setGridState] = useState<number[]>(Array(TOTAL_TILES).fill(0));
+
+  const percentages = { blue: 33, red: 33, green: 34 };
+  const [tpsValue, setTpsValue] = useState(25);
+
+  const handleTileClick = (index: number) => {
+    // ŞİMDİLİK: Kullanıcının MAVİ takımda (id: 2) olduğunu varsayıyoruz
+    const playerTeamId = 2;
+
+    setGridState(prev => {
+      const newState = [...prev];
+      newState[index] = playerTeamId; // Mavileştiriyoruz
+      return newState;
+    });
+
+    // Test: Tıkladıkça sağdaki overdrive barını doldur
+    setTpsValue(prev => Math.min(prev + 5, 100));
+  };
 
   return (
-    <>
-      <div className="flex items-center flex-col grow pt-10">
-        <div className="px-5">
-          <h1 className="text-center">
-            <span className="block text-2xl mb-2">Welcome to</span>
-            <span className="block text-4xl font-bold">Scaffold-ETH 2</span>
-          </h1>
-          <div className="flex justify-center items-center space-x-2 flex-col">
-            <p className="my-2 font-medium">Connected Address:</p>
-            <Address
-              address={connectedAddress}
-              chain={targetNetwork}
-              blockExplorerAddressLink={
-                targetNetwork.id === hardhat.id ? `/blockexplorer/address/${connectedAddress}` : undefined
-              }
-            />
-          </div>
+    <div className="min-h-screen bg-black flex flex-col items-center p-4">
+      
+      {/* 📊 DOMINANCE BAR */}
+      <div className="w-full max-w-4xl flex flex-col items-center gap-2 mt-6 mb-10">
+        <span className="text-white font-mono text-xs tracking-widest uppercase">TERRITORY CONTROL (Dominance)</span>
+        <div className="w-full h-8 bg-zinc-950 rounded-full overflow-hidden flex shadow-lg border-2 border-zinc-700">
+          <div style={{ width: `${percentages.blue}%` }} className="bg-blue-500 h-full transition-all duration-500 shadow-[0_0_15px_#3b82f6]"></div>
+          <div style={{ width: `${percentages.red}%` }} className="bg-red-500 h-full transition-all duration-500 shadow-[0_0_15px_#ef4444]"></div>
+          <div style={{ width: `${percentages.green}%` }} className="bg-green-500 h-full transition-all duration-500 shadow-[0_0_15px_#22c55e]"></div>
+        </div>
+      </div>
 
-          <p className="text-center text-lg">
-            Get started by editing{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/nextjs/app/page.tsx
-            </code>
-          </p>
-          <p className="text-center text-lg">
-            Edit your smart contract{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              YourContract.sol
-            </code>{" "}
-            in{" "}
-            <code className="italic bg-base-300 text-base font-bold max-w-full break-words break-all inline-block">
-              packages/hardhat/contracts
-            </code>
-          </p>
+      <div className="flex flex-row items-center gap-8">
+        {/* 🎮 15x15 GRID SAVAŞ ALANI */}
+        <div className="grid grid-cols-[repeat(15,_minmax(0,_1fr))] gap-1.5 p-3 bg-black border-4 border-zinc-800 rounded-3xl shadow-[0_0_50px_rgba(255,255,255,0.05)]">
+          {gridState.map((teamId, index) => {
+            const team = teams[teamId as keyof typeof teams] || teams[0];
+            return (
+              <button
+                key={index}
+                onClick={() => handleTileClick(index)}
+                className={`w-10 h-10 rounded-md transition-all duration-150 active:scale-90 hover:scale-110 z-10 
+                  ${team.bg} ${team.border} ${team.shadow}`}
+              />
+            );
+          })}
         </div>
 
-        <div className="grow bg-base-300 w-full mt-16 px-8 py-12">
-          <div className="flex justify-center items-center gap-12 flex-col md:flex-row">
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <BugAntIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Tinker with your smart contract using the{" "}
-                <Link href="/debug" passHref className="link">
-                  Debug Contracts
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
-            <div className="flex flex-col bg-base-100 px-10 py-10 text-center items-center max-w-xs rounded-3xl">
-              <MagnifyingGlassIcon className="h-8 w-8 fill-secondary" />
-              <p>
-                Explore your local transactions with the{" "}
-                <Link href="/blockexplorer" passHref className="link">
-                  Block Explorer
-                </Link>{" "}
-                tab.
-              </p>
-            </div>
+        {/* ⚡ OVERDRIVE BAR */}
+        <div className="flex flex-col items-center gap-3">
+          <span className="text-yellow-400 font-bold text-xs tracking-wider uppercase rotate-90 my-10">OVERDRIVE</span>
+          <div className="w-8 h-[450px] bg-zinc-950 rounded-full border border-zinc-800 p-1 flex items-end">
+            <div 
+              style={{ height: `${tpsValue}%` }} 
+              className="w-full bg-yellow-400 rounded-full shadow-[0_0_15px_#facc15] transition-all duration-300"
+            />
           </div>
         </div>
       </div>
-    </>
+
+      <p className="mt-14 text-zinc-700 text-sm font-mono tracking-widest uppercase">
+        Monad Network | Territory War | Parallel Conquest
+      </p>
+    </div>
   );
 };
 
-export default Home;
+export default HomePage;
