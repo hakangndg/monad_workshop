@@ -13,8 +13,6 @@ export const GameBoard = () => {
   const [timeLeft, setTimeLeft] = useState(30); // 30 seconds for testing
   const [aiMode, setAiMode] = useState(false);
   const [powerUpIndex, setPowerUpIndex] = useState<number | null>(null);
-  const [isMinting, setIsMinting] = useState(false);
-  const [hasMinted, setHasMinted] = useState(false);
   const clickTimes = useRef<number[]>([]);
   const boardRef = useRef<number[]>(board);
 
@@ -47,15 +45,8 @@ export const GameBoard = () => {
     if (timeLeft > 0) {
       const timerId = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timerId);
-    } else if (timeLeft === 0 && !isMinting && !hasMinted) {
-      // Start Minting Simulation
-      setIsMinting(true);
-      setTimeout(() => {
-        setIsMinting(false);
-        setHasMinted(true);
-      }, 3000); // 3s minting phase
     }
-  }, [timeLeft, isMinting, hasMinted]);
+  }, [timeLeft]);
 
   // --- AI INVASION LOGIC ---
   useEffect(() => {
@@ -220,76 +211,49 @@ export const GameBoard = () => {
   // Winner calculation
   let winner = null;
   let winnerColor = "";
-  if (isGameOver && !isMinting) {
-    const scores = [
-      { name: "RED TEAM", count: redCount, color: "text-red-500", bg: "bg-red-500" },
-      { name: "BLUE TEAM", count: blueCount, color: "text-blue-500", bg: "bg-blue-500" },
-      { name: "GREEN TEAM", count: greenCount, color: "text-green-500", bg: "bg-green-500" },
-      { name: "AI SWARM", count: purpleCount, color: "text-purple-500", bg: "bg-purple-500" },
+  if (isGameOver) {
+    const allScores = [
+      { name: "RED TEAM", count: redCount, color: "text-red-500" },
+      { name: "BLUE TEAM", count: blueCount, color: "text-blue-500" },
+      { name: "GREEN TEAM", count: greenCount, color: "text-green-500" },
+      { name: "AI SWARM", count: purpleCount, color: "text-purple-500" },
     ];
-    scores.sort((a, b) => b.count - a.count);
-
-    if (scores[0].count === scores[1].count) {
+    allScores.sort((a, b) => b.count - a.count);
+    if (allScores[0].count === allScores[1].count) {
       winner = "DRAW";
       winnerColor = "text-gray-400";
     } else {
-      winner = scores[0].name;
-      winnerColor = scores[0].color;
+      winner = allScores[0].name;
+      winnerColor = allScores[0].color;
     }
   }
 
   return (
     <>
-      {/* MINTING & NFT OVERLAY */}
+      {/* GAME OVER OVERLAY */}
       {isGameOver && (
-        <div className="fixed inset-0 bg-black/95 z-50 flex flex-col items-center justify-center backdrop-blur-md">
-          {isMinting ? (
-            <div className="flex flex-col items-center gap-6">
-              <div className="w-16 h-16 border-4 border-yellow-400 border-t-transparent rounded-full animate-spin shadow-[0_0_20px_rgba(250,204,21,0.8)]"></div>
-              <h2 className="text-4xl font-mono text-yellow-400 font-bold animate-pulse">
-                Minting Soulbound Warlord NFT...
-              </h2>
-              <p className="text-gray-400 font-mono">Securing final game state on Monad...</p>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center animate-zoom-in">
-              <h1 className="text-5xl font-black text-white mb-8 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">
-                BATTLE CONCLUDED
-              </h1>
-
-              {/* NFT CARD */}
-              <div
-                className={`relative p-1 rounded-2xl bg-gradient-to-br from-yellow-300 via-yellow-600 to-yellow-900 shadow-[0_0_50px_rgba(250,204,21,0.5)] transform hover:scale-105 transition-transform duration-500`}
-              >
-                <div className="bg-gray-900 rounded-xl p-8 flex flex-col items-center border border-yellow-500/50 min-w-[350px]">
-                  <div className="text-yellow-400 text-sm font-mono mb-6 tracking-[0.2em]">WARLORD TROPHY #42</div>
-                  <h2 className={`text-5xl font-black mb-2 drop-shadow-[0_0_30px_currentColor] ${winnerColor}`}>
-                    {winner === "DRAW" ? "IT'S A DRAW" : `${winner}`}
-                  </h2>
-                  <p className="text-gray-400 font-mono mb-8">
-                    {winner === "DRAW" ? "No clear victor." : "SUPREME CHAMPION"}
-                  </p>
-
-                  <div className="w-full flex justify-between text-sm font-mono border-t border-gray-800 pt-4">
-                    <span className="text-red-500">RED: {redCount}</span>
-                    <span className="text-blue-500">BLU: {blueCount}</span>
-                    <span className="text-green-500">GRN: {greenCount}</span>
-                    <span className="text-purple-500">AI: {purpleCount}</span>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={() => {
-                  setTimeLeft(30);
-                  setHasMinted(false);
-                }}
-                className="mt-12 px-8 py-4 bg-transparent border-2 border-white text-white font-bold text-xl rounded-full hover:bg-white hover:text-black transition-colors"
-              >
-                PLAY AGAIN
-              </button>
-            </div>
-          )}
+        <div className="fixed inset-0 bg-black/90 z-50 flex flex-col items-center justify-center backdrop-blur-sm">
+          <h1 className="text-6xl font-black text-white mb-6 drop-shadow-[0_0_20px_rgba(255,255,255,0.8)]">GAME OVER</h1>
+          <h2 className={`text-7xl font-black animate-pulse drop-shadow-[0_0_40px_currentColor] mb-4 ${winnerColor}`}>
+            {winner === "DRAW" ? "IT'S A DRAW!" : `${winner} WINS!`}
+          </h2>
+          <div className="mt-4 flex gap-6 text-xl font-mono text-gray-400">
+            <span className="text-red-500">RED: {redCount}</span>
+            <span className="text-blue-500">BLU: {blueCount}</span>
+            <span className="text-green-500">GRN: {greenCount}</span>
+            <span className="text-purple-500">AI: {purpleCount}</span>
+          </div>
+          <button
+            onClick={() => {
+              setTimeLeft(30);
+              setBoard(Array(225).fill(0));
+              setAiMode(false);
+              setPowerUpIndex(null);
+            }}
+            className="mt-12 px-10 py-4 bg-white text-black font-bold text-xl rounded-full hover:bg-gray-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+          >
+            PLAY AGAIN
+          </button>
         </div>
       )}
 

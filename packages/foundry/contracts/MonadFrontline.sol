@@ -14,4 +14,12 @@ contract MonadFrontline {
         scores[teamId] += multiplier;
         emit TileClaimed(tileId, teamId);
     }
+
+    function getBoard() public view returns (uint8[225] memory) {
+        uint8[225] memory board;
+        for (uint256 i = 0; i < 225; i++) {
+            board[i] = grid[i];
+        }
+        return board;
+    }
 }
